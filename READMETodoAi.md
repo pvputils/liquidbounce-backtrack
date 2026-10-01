@@ -1,46 +1,30 @@
-# Standalone Backtrack
+# Original LiquidBounce Backtrack on Fabric
 
-Client-only Fabric mod for Minecraft **26.3**, **Java 25**, Fabric Loader **0.19.5+**, and Fabric API **0.160.5+26.3**. Install Fabric API separately beside the mod in your Minecraft instance's `mods` directory.
+Minecraft **26.3**, **Java 25**. This uses LiquidBounce's original Kotlin Backtrack module, not a rewritten approximation. Its module, shared Blink packet queue, position tracker, Chronometer, Box/Model/Wireframe/None ESP implementations, wireframe pose geometry, targeting, and supporting event/config/render systems are retained from upstream.
 
-Only the Backtrack behavior remains. Incoming gameplay packets are delayed after attacking a target, retaining its older client position while tracking its actual position. Moving closer flushes the queue. Outgoing packets are never delayed. There is no LiquidBounce framework, browser, npm build, general Blink module, HUD, or ESP renderer. The original GPL license and behavior attribution are retained.
+Backtrack is the only registered module. Other source files needed by the retained framework remain available as dependencies; this is deliberately not a source-only extraction. Browser startup, browser theme building, online marketplace/account initialization, and deep-learning startup are omitted. No npm or Node installation is required to build or run.
 
-## Build and run
+## Build and launch
 
-Set `JAVA_HOME` to a Java 25 JDK, then run from this repository:
+Set `JAVA_HOME` to a Java 25 JDK. On Windows run `gradlew.bat build` and `gradlew.bat runClient`. On Linux/macOS use `./gradlew build` and `./gradlew runClient`.
 
-- Windows: `gradlewTodoAi.bat build` or `gradlewTodoAi.bat runClient`
-- Linux/macOS: `sh gradlewTodoAi build` or `sh gradlewTodoAi runClient`
-- Client integration test: replace the task with `runClientGameTest`.
+Install `build/libs/liquidbounce-0.40.1.jar` in a Fabric Loader 0.19.5+ Minecraft 26.3 instance alongside Fabric API 0.160.5+26.3 and Fabric Language Kotlin matching the version in `gradle/libs.versions.toml`. The mod retains its upstream `liquidbounce` ID to preserve internal resource/config references, and displays as Backtrack Fabric. Its development client uses `run/backtrack-originalTodoAi`, separate from previous run directories.
 
-The installable jar is `build/libs/backtrack-1.0.0.jar` (not the sources jar). The development client uses `run/backtrackTodoAi`; it does not reuse the old LiquidBounce run directory.
+## Controls and original settings
 
-New tracked files carry `TodoAi` before their extensions. The wrappers generate a minimal Gradle settings file under ignored `.gradle/bootstrapTodoAi`; resource processing generates Fabric's required `fabric.mod.json` and `en_us.json` in build output. Use these wrappers, rather than bare Gradle, to load `buildTodoAi.gradle`.
+**B** toggles Backtrack and can be rebound in Minecraft Controls. `/backtrack on`, `/backtrack off`, `/backtrack toggle` and `/backtrack` control/report the original module. `/backtrackvisual` toggles visuals, and `/backtrackvisual box|model|wireframe|none` selects an original ESP mode. The original command system remains available:
 
-## Controls and settings
+- `.toggle Backtrack`
+- `.bind Backtrack b`
+- `.value set <setting-path> <value>`: use Tab completion for exact paths and allowed values.
+- `.targets` configures the original global target filters; `.friend` manages friend exclusions.
 
-Backtrack starts disabled. **B** toggles it; rebind it in Minecraft's Controls menu. Client commands:
+The original Backtrack settings are Range, Delay, NextBacktrackDelay, TrackingBuffer, Chance, PauseOnHurtTime/HurtTime, TargetMode (Attack or Range), LastAttackTimeToWork, and Esp. All defaults, validation, target selection, queue timing and packet exceptions come from the upstream module unchanged.
 
-- `/backtrack` prints settings and queue size.
-- `/backtrack on`, `/backtrack off`, `/backtrack toggle`
-- `/backtrack set <setting> <value>` changes and saves a setting, e.g. `/backtrack set chance 100`.
-
-Settings are saved in `config/backtrackTodoAi.json` in the running Minecraft instance. Changes to the JSON file take effect on restart. Invalid settings fall back to defaults with a log warning.
-
-| Setting | Default | Allowed |
-| --- | --- | --- |
-| rangeMin / rangeMax | 1 / 3 blocks | 0–10; minimum ≤ maximum |
-| delayMin / delayMax | 100 / 150 ms | 0–1000; minimum ≤ maximum |
-| cooldownMin / cooldownMax | 0 / 10 ms | 0–2000; minimum ≤ maximum |
-| trackingBuffer | 500 ms | 0–2000 |
-| chance | 50 percent | 0–100; rolled per attack |
-| attackWindow | 1000 ms | 0–5000 since last attack |
-| pauseOnHurt | false | true / false |
-| hurtThreshold | 3 ticks | 0–10 |
-| targetMode | attack | attack / range |
-| targetMobs | false | true / false; players remain eligible |
-
-Distances use entity bounding boxes. Range mode selects the closest eligible entity but still requires a recent attack. Chat, player hurt sounds, and keepalive/ping packets pass immediately. Teleport, respawn, disconnect, protocol transitions, death, invalid targets, and disable flush or drop queued packets as appropriate; packets bound to an unloaded world or disconnected listener are dropped. The queue is capped at 4096 packets and manipulated only on the client thread.
+ESP choices are **Box**, **Model**, **Wireframe** (upstream default), and **None**. Box and Wireframe retain their original Color/OutlineColor settings; Model retains OutlineColor and LightPercent. Select None to hide the visuals independently of Backtrack. These render at the tracked actual position using the original render pipeline; no replacement cyan/orange overlay is used. Changes persist in the upstream `LiquidBounce` configuration folder inside the Minecraft instance.
 
 ## Validation
 
-JUnit tests check FIFO ordering, exact delay boundaries, zero delay, flush, and drop behavior. A separate Fabric client test mod creates a world and exercises the actual packet-dispatch mixin, timed replay, disable flush, disabled pass-through, closer-target flush, and stale-packet dropping. Test classes and metadata are excluded from the production jar.
+`gradlew build` runs the restored unit tests, Detekt, ABI and access-widener checks. `gradlew runClientGameTest` launches a fresh Fabric world and checks that only Backtrack is registered, no browser starts, original incoming packets queue/replay, disable flushes packets, and all four original ESP choices can be selected and rendered. Screenshots are captured for the three visible modes. Test code is a separate mod and is excluded from the production jar.
+
+The original source can be checked against upstream commit `0a80fecbdd3dedff68235454bd34ef71cd7596d3`. Startup/build adaptations are marked with Codex comments; new bridge/test/document files use TodoAi names. Original restored files retain their upstream names and GPL attribution.
