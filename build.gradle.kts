@@ -456,6 +456,9 @@ tasks.processResources {
         @Suppress("UNCHECKED_CAST")
         val entrypoints = metadata["entrypoints"] as MutableMap<String, Any>
         entrypoints["client"] = listOf("net.ccbluex.liquidbounce.fabric.BacktrackFabricTodoAi")
+        // codex start
+        entrypoints["modmenu"] = listOf("net.ccbluex.liquidbounce.fabric.BacktrackModMenuTodoAi")
+        //codex end
         @Suppress("UNCHECKED_CAST")
         val dependencies = metadata["depends"] as MutableMap<String, Any>
         @Suppress("UNCHECKED_CAST")

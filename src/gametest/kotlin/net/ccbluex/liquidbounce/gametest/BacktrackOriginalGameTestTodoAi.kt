@@ -33,6 +33,7 @@ class BacktrackOriginalGameTestTodoAi : FabricClientGameTest {
             check(ModuleManager.map { it.name } == listOf("Backtrack"))
             check(BrowserBackendManager.backend == null)
         }
+        BacktrackConfigGameTestTodoAi().runTest(context)
         context.worldBuilder().create().use {
             context.waitFor { client -> client.player != null && client.player!!.tickCount > 20 }
             prepare(context)

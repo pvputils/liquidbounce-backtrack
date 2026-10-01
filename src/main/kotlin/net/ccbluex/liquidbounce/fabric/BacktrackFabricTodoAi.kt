@@ -34,10 +34,16 @@ class BacktrackFabricTodoAi : ClientModInitializer {
 
     private fun registerBind() {
         val category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("backtrack", "controls"))
+        val menu = KeyMappingHelper.registerKeyMapping(
+            KeyMapping("key.backtrack.config", InputConstants.Type.KEYBOARD, InputConstants.KEY_O, category)
+        )
         val toggle = KeyMappingHelper.registerKeyMapping(
             KeyMapping("key.backtrack.toggle", InputConstants.Type.KEYBOARD, InputConstants.KEY_B, category)
         )
         ClientTickEvents.END_CLIENT_TICK.register { client ->
+            while (menu.consumeClick()) {
+                if (LiquidBounce.isInitialized) client.gui.setScreen(BacktrackConfigScreenTodoAi(client.gui.screen()))
+            }
             while (toggle.consumeClick()) {
                 if (LiquidBounce.isInitialized && client.player != null) {
                     setState("toggle")
@@ -60,6 +66,12 @@ class BacktrackFabricTodoAi : ClientModInitializer {
                     1
                 })
             }
+            command.then(ClientCommands.literal("config").executes {
+                net.minecraft.client.Minecraft.getInstance().schedule {
+                    net.minecraft.client.Minecraft.getInstance().gui.setScreen(BacktrackConfigScreenTodoAi())
+                }
+                1
+            })
             dispatcher.register(command)
             val visual = ClientCommands.literal("backtrackvisual").executes { context ->
                 val esp = ModuleBacktrack.settings.getValue("Esp") as ModeValueGroup<*>
