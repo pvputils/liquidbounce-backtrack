@@ -78,7 +78,6 @@ import net.ccbluex.liquidbounce.lang.LanguageManager
 import net.ccbluex.liquidbounce.render.FontManager
 import net.ccbluex.liquidbounce.render.HAS_AMD_VEGA_APU
 import net.ccbluex.liquidbounce.render.atlas.ItemImageAtlas
-import net.ccbluex.liquidbounce.render.engine.BlurEffectRenderer
 import net.ccbluex.liquidbounce.utils.aiming.PostRotationExecutor
 import net.ccbluex.liquidbounce.utils.aiming.RotationManager
 import net.ccbluex.liquidbounce.utils.block.ChunkScanner
@@ -243,7 +242,6 @@ object LiquidBounce : EventListener {
 
         // Load all configurations
         ConfigSystem.loadAll()
-        AddonManager.notifyStarted()
 
         isInitialized = true
         logger.info("$CLIENT_NAME has been successfully initialized.")
@@ -269,8 +267,6 @@ object LiquidBounce : EventListener {
         // Feature managers
         ModuleManager
         CommandManager
-        ProxyManager
-        AccountManager
 
         // Utility managers
         RotationManager
@@ -280,17 +276,11 @@ object LiquidBounce : EventListener {
         FriendManager
         InventoryManager
         EnderChestInventoryTracker
-        ActiveServerList
-        ConfigSystem.root(ClientAccountManager)
-        ConfigSystem.root(SpooferManager)
         ConfigSystem.root(GlobalManager)
-        ConfigSystem.root(MarketplaceManager)
-        ConfigSystem.root(ConfigTracker)
         PostRotationExecutor
         ServerObserver
         ItemImageAtlas
 
-        AddonManager.discover()
     }
 
     /**
@@ -299,10 +289,11 @@ object LiquidBounce : EventListener {
     private fun initializeFeatures() {
         // Register commands and modules
         CommandManager.registerInbuilt()
+        // codex start
+        net.ccbluex.liquidbounce.fabric.BacktrackDependenciesTodoAi.initialize()
+        //codex end
         ModuleManager.registerInbuilt()
 
-        AddonManager.registerCategories()
-        AddonManager.initializeAddons()
     }
 
     /**
@@ -310,68 +301,11 @@ object LiquidBounce : EventListener {
      * such as translations, cosmetics, player heads, configs and so on,
      * which do not rely on the main thread.
      */
-    private suspend fun initializeResources(
-        dispatcher: CoroutineDispatcher,
-    ) = withContext(dispatcher) {
-        logger.info("Initializing API...")
-        // Lookup API config
-        ApiConfig.config
-
-        supervisorScope {
-            launch {
-                // Load translations
-                LanguageManager.loadDefault()
-            }
-            launch {
-                val update = withTimeoutOrNull(8.seconds) { ClientUpdate.update.await() } ?: return@launch
-                logger.info("[Update] Update available: $clientVersion -> ${update.lbVersion}")
-            }
-            launch {
-                // Load cosmetics
-                CosmeticService.refreshCarriers(force = true) {
-                    logger.info("Successfully loaded ${CosmeticService.carriers.size} cosmetics carriers.")
-                }
-            }
-            launch {
-                // Download player heads
-                HeadsCreativeModeTab.heads.getFinalState()
-            }
-            launch {
-                MarketplaceConfigs.refresh()
-            }
-            launch {
-                MarketplaceItems.refresh()
-            }
-            launch {
-                MarketplaceManager.fillAuthors()
-            }
-            launch {
-                IpInfoApi.original
-            }
-            launch {
-                ConfigSystem.load(ClientAccountManager)
-                if (ClientAccount.ENV_ACCOUNT != null) {
-                    ClientAccountManager.clientAccount = ClientAccount.ENV_ACCOUNT
-                }
-
-                if (ClientAccountManager.clientAccount != ClientAccount.EMPTY_ACCOUNT) {
-                    runCatching {
-                        ClientAccountManager.clientAccount.renew()
-                    }.onFailure {
-                        logger.error("Failed to renew client account token.", it)
-                        if (it.httpException?.isInvalidGrant == true) {
-                            ClientAccountManager.clientAccount = ClientAccount.EMPTY_ACCOUNT
-                            ConfigSystem.store(ClientAccountManager)
-                        }
-                    }.onSuccess {
-                        logger.info("Successfully renewed client account token.")
-                    }
-                }
-            }
-        }
-
-        logger.info("API initialization done.")
+    // codex start
+    private suspend fun initializeResources(dispatcher: CoroutineDispatcher) = withContext(dispatcher) {
+        LanguageManager.loadDefault()
     }
+    //codex end
 
     /**
      * Prepares the GUI stage of the client.
@@ -381,60 +315,6 @@ object LiquidBounce : EventListener {
         dispatcher: CoroutineDispatcher
     ) = withContext(dispatcher) {
         RenderSystem.assertOnRenderThread()
-
-        BrowserBackendManager.init()
-        ClientInteropServer.start()
-
-        // Preload marketplace items
-        ConfigSystem.load(MarketplaceManager)
-        MarketplaceManager.subscribedItems.forEach(SubscribedItem::restoreRetired)
-        AddonInstaller.stageSubscribedAddons()
-        MarketplaceManager.reloadHandlers()
-
-        if (!ClientInteropServer.isSkipping) {
-            ThemeManager.init()
-            ConfigSystem.load(ThemeManager)
-            ThemeManager.load()
-        }
-
-        BlurEffectRenderer
-        ScreenManager
-
-        // Holds the chosen browser backend
-        ConfigSystem.load(GlobalManager)
-
-        taskManager = TaskManager(ioScope).apply {
-            // Either immediately starts browser or spawns a task to request browser dependencies,
-            // and then starts the browser through render thread.
-            BrowserBackendManager.makeDependenciesAvailable(this)
-
-            // Initialize deep learning engine as task, because we cannot know if DJL will request
-            // resources from the internet.
-            launch("Deep Learning") { task ->
-                runCatching {
-                    DeepLearningEngine.init(task)
-                    ModelManager.load()
-                    DeepLearningEngine.markInitialized()
-                }.onFailure { exception ->
-                    task.subTasks.clear()
-                    DeepLearningEngine.markUnavailable()
-
-                    // LiquidBounce can still run without deep learning,
-                    // and we don't want to crash the client if it fails.
-                    logger.info("Failed to initialize deep learning.", exception)
-                }
-            }
-
-            launch("Marketplace") { task ->
-                runCatching {
-                    MarketplaceManager.updateAll(task)
-                }.onFailure { exception ->
-                    logger.error("Failed to update marketplace items.", exception)
-                }
-
-                task.isCompleted = true
-            }
-        }
 
         // Prepare glyph manager
         val duration = measureTime {
@@ -459,18 +339,11 @@ object LiquidBounce : EventListener {
         FontManager.closeGlyphManager()
         EventManager.unregisterAll()
 
-        // Shutdown HTTP server
-        ioScope.launch {
-            ClientInteropServer.stop()
-        }
 
-        AddonManager.notifyStopping()
 
         // Save all configurations
         ConfigSystem.storeAll()
 
-        // Shutdown browser
-        BrowserBackendManager.stop()
     }
 
     /**
@@ -495,7 +368,6 @@ object LiquidBounce : EventListener {
             val resourceManager = mc.resourceManager
             if (resourceManager is ReloadableResourceManager) {
                 resourceManager.registerReloadListener(ClientResourceReloader)
-                resourceManager.registerReloadListener(ThemeManager.reloader)
             } else {
                 logger.warn("Failed to register resource reloader!")
 
@@ -503,9 +375,7 @@ object LiquidBounce : EventListener {
                 initializeClient(
                     workerDispatcher = Dispatchers.Default,
                     renderThreadDispatcher = Dispatchers.Main,
-                ).thenCompose {
-                    ThemeManager.reloader.reload()
-                }
+                ) //codex (initializeClient(...).thenCompose { ThemeManager.reloader.reload() })
             }
         }.onFailure {
             ErrorHandler.fatal(it, additionalMessage = "Client start")

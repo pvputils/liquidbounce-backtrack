@@ -142,31 +142,9 @@ public abstract class MixinGameRenderer {
         return fogMode;
     }
 
-    @WrapOperation(
-        method = "renderItemInHand",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher;prepareFrame(Lnet/minecraft/client/renderer/SubmitNodeStorage;)Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher$PreparedFrame;"
-        )
-    )
-    private FeatureRenderDispatcher.PreparedFrame drawItemCharmsOnHandPrepareFrame(
-        FeatureRenderDispatcher instance, SubmitNodeStorage submitNodeStorage,
-        Operation<FeatureRenderDispatcher.PreparedFrame> original
-    ) {
-        return ModuleItemChams.Lightmap.doOverride(() -> original.call(instance, submitNodeStorage));
-    }
 
-    @Inject(
-        method = "render",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/client/renderer/Lightmap;render(Lnet/minecraft/client/renderer/state/LightmapRenderState;)V",
-            shift = At.Shift.AFTER
-        )
-    )
-    private void hookItemChamsLightmapRefresh(CallbackInfo ci) {
-        ModuleItemChams.Lightmap.refresh(this.lightmap.getTextureView());
-    }
+
+
 
     @Inject(method = "bobHurt", at = @At("HEAD"), cancellable = true)
     private void injectHurtCam(CameraRenderState cameraState, PoseStack poseStack, CallbackInfo ci) {

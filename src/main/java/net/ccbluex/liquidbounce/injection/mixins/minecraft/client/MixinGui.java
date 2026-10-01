@@ -26,7 +26,6 @@ import net.ccbluex.liquidbounce.event.EventManager;
 import net.ccbluex.liquidbounce.event.events.ScreenEvent;
 import net.ccbluex.liquidbounce.event.events.ScreenRenderEvent;
 import net.ccbluex.liquidbounce.features.module.modules.movement.inventorymove.ModuleInventoryMove;
-import net.ccbluex.liquidbounce.features.module.modules.player.cheststealer.features.FeatureSilentScreen;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.MouseHandler;
@@ -83,12 +82,6 @@ public abstract class MixinGui {
         }
     }
 
-    @WrapWithCondition(method = "setScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MouseHandler;releaseMouse()V"))
-    private boolean cancelScreenMouseForChestStealer(MouseHandler instance) {
-        // Allows rotation.
-        return !LiquidBounce.INSTANCE.isInitialized() ||
-            !FeatureSilentScreen.INSTANCE.getShouldHide() || FeatureSilentScreen.INSTANCE.getUnlockCursor();
-    }
 
     /**
      * Hook screen render event

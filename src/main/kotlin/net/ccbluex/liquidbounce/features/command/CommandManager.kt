@@ -35,7 +35,6 @@ import net.ccbluex.liquidbounce.features.command.brigadier.deepestExecutableCont
 import net.ccbluex.liquidbounce.features.command.brigadier.offset
 import net.ccbluex.liquidbounce.features.command.commands.client.CommandBind
 import net.ccbluex.liquidbounce.features.command.commands.client.CommandBinds
-import net.ccbluex.liquidbounce.features.command.commands.client.CommandClear
 import net.ccbluex.liquidbounce.features.command.commands.client.CommandConfig
 import net.ccbluex.liquidbounce.features.command.commands.client.CommandDebug
 import net.ccbluex.liquidbounce.features.command.commands.client.CommandFriend
@@ -43,37 +42,10 @@ import net.ccbluex.liquidbounce.features.command.commands.client.CommandHelp
 import net.ccbluex.liquidbounce.features.command.commands.client.CommandHide
 import net.ccbluex.liquidbounce.features.command.commands.client.CommandLocalConfig
 import net.ccbluex.liquidbounce.features.command.commands.client.CommandPanic
-import net.ccbluex.liquidbounce.features.command.commands.client.CommandAddon
 import net.ccbluex.liquidbounce.features.command.commands.client.CommandTargets
 import net.ccbluex.liquidbounce.features.command.commands.client.CommandToggle
 import net.ccbluex.liquidbounce.features.command.commands.client.CommandValue
 import net.ccbluex.liquidbounce.features.command.commands.client.client.CommandClient
-import net.ccbluex.liquidbounce.features.command.commands.client.marketplace.CommandMarketplace
-import net.ccbluex.liquidbounce.features.command.commands.deeplearn.CommandModels
-import net.ccbluex.liquidbounce.features.command.commands.ingame.CommandCenter
-import net.ccbluex.liquidbounce.features.command.commands.ingame.CommandCoordinates
-import net.ccbluex.liquidbounce.features.command.commands.ingame.CommandPing
-import net.ccbluex.liquidbounce.features.command.commands.ingame.CommandRemoteView
-import net.ccbluex.liquidbounce.features.command.commands.ingame.CommandSay
-import net.ccbluex.liquidbounce.features.command.commands.ingame.CommandServerInfo
-import net.ccbluex.liquidbounce.features.command.commands.ingame.CommandTps
-import net.ccbluex.liquidbounce.features.command.commands.ingame.CommandUsername
-import net.ccbluex.liquidbounce.features.command.commands.ingame.creative.CommandItemEnchant
-import net.ccbluex.liquidbounce.features.command.commands.ingame.creative.CommandItemGive
-import net.ccbluex.liquidbounce.features.command.commands.ingame.creative.CommandItemRename
-import net.ccbluex.liquidbounce.features.command.commands.ingame.creative.CommandItemSkull
-import net.ccbluex.liquidbounce.features.command.commands.ingame.creative.CommandItemStack
-import net.ccbluex.liquidbounce.features.command.commands.ingame.CommandMapImage
-import net.ccbluex.liquidbounce.features.command.commands.ingame.fakeplayer.CommandFakePlayer
-import net.ccbluex.liquidbounce.features.command.commands.module.CommandAutoAccount
-import net.ccbluex.liquidbounce.features.command.commands.module.CommandAutoDisable
-import net.ccbluex.liquidbounce.features.command.commands.module.CommandInvsee
-import net.ccbluex.liquidbounce.features.command.commands.module.CommandXRay
-import net.ccbluex.liquidbounce.features.command.commands.module.teleport.CommandPlayerTeleport
-import net.ccbluex.liquidbounce.features.command.commands.module.teleport.CommandTeleport
-import net.ccbluex.liquidbounce.features.command.commands.module.teleport.CommandVClip
-import net.ccbluex.liquidbounce.features.command.commands.translate.CommandAutoTranslate
-import net.ccbluex.liquidbounce.features.command.commands.translate.CommandTranslate
 import net.ccbluex.liquidbounce.features.misc.SelfDestruct
 import net.ccbluex.liquidbounce.lang.translation
 import net.ccbluex.liquidbounce.features.addon.AddonApi
@@ -136,47 +108,19 @@ object CommandManager : EventListener {
     }
 
     fun registerInbuilt() {
-        register(CommandPing)
-        register(CommandTps)
-        register(CommandUsername)
-        register(CommandClear)
-        register(CommandCoordinates)
-        register(CommandMapImage)
         register(CommandHide)
         register(CommandPanic)
-        register(CommandSay)
-        register(CommandTranslate)
-        register(CommandAutoTranslate)
-        register(CommandItemRename)
-        register(CommandMarketplace)
         register(CommandToggle)
         register(CommandTargets)
         register(CommandBinds)
-        register(CommandAutoDisable)
-        register(CommandInvsee)
-        register(CommandXRay)
         register(CommandValue)
         register(CommandBind)
-        register(CommandAutoAccount)
-        register(CommandCenter)
         register(CommandHelp)
-        register(CommandRemoteView)
         register(CommandDebug)
         register(CommandFriend)
         register(CommandClient)
         register(CommandConfig)
         register(CommandLocalConfig)
-        register(CommandAddon)
-        register(CommandFakePlayer)
-        register(CommandItemGive)
-        register(CommandItemSkull)
-        register(CommandItemStack)
-        register(CommandItemEnchant)
-        register(CommandVClip)
-        register(CommandTeleport)
-        register(CommandPlayerTeleport)
-        register(CommandServerInfo)
-        register(CommandModels)
     }
 
     /**
