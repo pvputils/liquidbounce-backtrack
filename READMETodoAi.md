@@ -14,7 +14,7 @@ Set `JAVA_HOME` to a Java 25 JDK, then run from this repository:
 
 The installable jar is `build/libs/backtrack-1.0.0.jar` (not the sources jar). The development client uses `run/backtrackTodoAi`; it does not reuse the old LiquidBounce run directory.
 
-New tracked files carry `TodoAi` before their extensions. The wrappers generate a minimal Gradle settings file under ignored `.gradle/bootstrapTodoAi`; resource processing generates Fabric's required `fabric.mod.json` and `en_us.json` in build output. Use these wrappers, rather than bare Gradle, to load `buildTodoAi.gradle`.
+New tracked files carry `TodoAi` before their extensions. The wrappers generate a minimal Gradle settings file under ignored `.gradle/bootstrapTodoAi`; resource processing generates Fabric's required `fabric.mod.json` and `en_us.json` in build output. Use these wrappers, rather than bare Gradle, to load `build.gradle`.
 
 ## Controls and settings
 
